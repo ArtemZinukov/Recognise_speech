@@ -1,8 +1,27 @@
 import random
+import logging
+import traceback
+
+import telegram
 import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 from df_google import detect_intent_texts
 from environs import Env
+import time
+
+
+logger = logging.getLogger(__name__)
+
+
+class TelegramLogsHandler(logging.Handler):
+    def __init__(self, tg_bot, chat_id):
+        super().__init__()
+        self.chat_id = chat_id
+        self.tg_bot = tg_bot
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        self.tg_bot.send_message(chat_id=self.chat_id, text=log_entry)
 
 
 def listen_for_messages(vk_session, project_id):
@@ -28,17 +47,34 @@ def send_message_vk(message_text, vk_api_instance, event):
 def main():
     env = Env()
     env.read_env()
+
+    vk_bot_token = env.str("VK_BOT_TOKEN")
+    project_id = env.str('PROJECT_ID')
+    tg_bot_logger_token = env.str("TG_BOT_LOGGER_TOKEN")
+    tg_chat_id = env.str("TG_CHAT_ID")
+
+    tg_bot = telegram.Bot(token=tg_bot_logger_token)
+
+    telegram_handler = TelegramLogsHandler(tg_bot, tg_chat_id)
+    telegram_handler.setLevel(logging.INFO)
+    telegram_formatter = logging.Formatter('%(message)s')
+    telegram_handler.setFormatter(telegram_formatter)
+
+    logger.addHandler(telegram_handler)
+    logger.setLevel(logging.INFO)
+    logger.info('Запуск бота')
+
     while True:
         try:
-            vk_bot_token = env.str("VK_BOT_TOKEN")
-            project_id = env.str('PROJECT_ID')
-
             vk_session = vk_api.VkApi(token=vk_bot_token)
             listen_for_messages(vk_session, project_id)
-        except vk_api.ApiError as e:
-            print(f"Ошибка VK API: {e}")
+        except vk_api.ApiError as err:
+            logger.error(f"Ошибка VK API: {err}")
+            time.sleep(5)
         except Exception as e:
-            print(f"Произошла неожиданная ошибка: {e}")
+            logger.error(f'Ошибка: {e}')
+            logger.error(traceback.format_exc())
+            time.sleep(5)
 
 
 if __name__ == '__main__':
