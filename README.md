@@ -43,3 +43,9 @@ python tg_bot.py
 ```
 python vk_bot.py
 ```
+Для того чтобы создавать интенты в Dialogflow на основе JSON-файла используйте следующую команду:
+
+```
+python df_scripts.py --file путь к вашему файлу
+```
+По дефолту установлено значение в переменной DEFAULT_URL_JSON.
