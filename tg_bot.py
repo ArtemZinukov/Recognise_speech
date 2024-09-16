@@ -54,9 +54,8 @@ def main():
             dispatcher.bot_data['unique_session_id'] = unique_session_id
             updater.start_polling()
             updater.idle()
-        except Exception as e:
-            logger.error(f"ТГ бот упал с ошибкой: {e}")
-            logger.error(traceback.format_exc())
+        except Exception:
+            logger.exception("ТГ бот упал с ошибкой")
             time.sleep(5)
 
 if __name__ == '__main__':

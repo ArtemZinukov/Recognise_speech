@@ -60,9 +60,8 @@ def main():
         except vk_api.ApiError as err:
             logger.error(f"Ошибка VK API: {err}")
             time.sleep(5)
-        except Exception as e:
-            logger.error(f'Ошибка: {e}')
-            logger.error(traceback.format_exc())
+        except Exception:
+            logger.exception("Произошла ошибка")
             time.sleep(5)
 
 
