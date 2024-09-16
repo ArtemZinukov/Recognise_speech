@@ -1,5 +1,4 @@
 import logging
-import traceback
 import telegram
 from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
@@ -13,8 +12,9 @@ logger = logging.getLogger(__name__)
 
 def handle_message(update: Update, context: CallbackContext):
     user_message = update.message.text
+    user_id =update.message.from_user.id
     df_response_text, df_response_status = detect_intent_texts(context.bot_data['project_id'],
-                                                               context.bot_data['unique_session_id'],
+                                                               user_id,
                                                                user_message, 'ru')
     if df_response_text:
         update.message.reply_text(df_response_text)
@@ -51,7 +51,6 @@ def main():
             dispatcher.add_handler(CommandHandler("start", start))
             dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
             dispatcher.bot_data['project_id'] = project_id
-            dispatcher.bot_data['unique_session_id'] = unique_session_id
             updater.start_polling()
             updater.idle()
         except Exception:
