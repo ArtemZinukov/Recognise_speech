@@ -8,20 +8,9 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from df_google import detect_intent_texts
 from environs import Env
 import time
-
+from tg_logger import TelegramLogsHandler
 
 logger = logging.getLogger(__name__)
-
-
-class TelegramLogsHandler(logging.Handler):
-    def __init__(self, tg_bot, chat_id):
-        super().__init__()
-        self.chat_id = chat_id
-        self.tg_bot = tg_bot
-
-    def emit(self, record):
-        log_entry = self.format(record)
-        self.tg_bot.send_message(chat_id=self.chat_id, text=log_entry)
 
 
 def listen_for_messages(vk_session, project_id):
