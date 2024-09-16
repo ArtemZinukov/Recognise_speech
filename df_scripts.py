@@ -1,6 +1,10 @@
+import argparse
 from google.cloud import dialogflow
 import requests
 from environs import Env
+
+
+DEFAULT_URL_JSON="https://dvmn.org/media/filer_public/a7/db/a7db66c0-1259-4dac-9726-2d1fa9c44f20/questions.json"
 
 
 def download_json(url):
@@ -36,10 +40,16 @@ def create_intent(project_id, display_name, training_phrases_parts, message_text
 def main():
     env = Env()
     env.read_env()
-    json_url = "https://dvmn.org/media/filer_public/a7/db/a7db66c0-1259-4dac-9726-2d1fa9c44f20/questions.json"
-    intent_data = download_json(json_url)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", type=str,
+                        default=DEFAULT_URL_JSON,
+                        help="Путь к файлу с данными")
+    args = parser.parse_args()
 
     project_id = env.str('PROJECT_ID')
+
+    intent_data = download_json(args.file)
 
     for display_name, content in intent_data.items():
         create_intent(
