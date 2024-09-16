@@ -1,6 +1,5 @@
 import random
 import logging
-import traceback
 
 import telegram
 import vk_api
